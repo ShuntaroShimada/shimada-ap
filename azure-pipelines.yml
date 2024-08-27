@@ -4,16 +4,24 @@
 # https://aka.ms/yaml
 
 trigger:
-- main
+- master
 
 pool:
   vmImage: ubuntu-latest
 
-steps:
-- script: echo Hello, world!
-  displayName: 'Run a one-line script'
+stages:
+- stage: Deploy
+  jobs:
+  - job: DeployToRedHat
+    steps:
+    - script: echo "Starting Deployment to RedHat VM"
+      displayName: "Echo Start"
 
-- script: |
-    echo Add other tasks to build, test, and deploy your project.
-    echo See https://aka.ms/yaml
-  displayName: 'Run a multi-line script'
+    - task: CopyFilesOverSSH@0
+      inputs:
+        sshEndpoint: 'RedHatVM'  # Service connection name
+        sourceFolder: '$(Build.SourcesDirectory)/path/to/your/files' # パイプラインで取得したファイルの場所
+        contents: '**' # 全てのファイルをコピー
+        targetFolder: '/remote/path/on/vm' # コピー先のディレクトリ
+        cleanTargetFolder: true
+        overwrite: true
